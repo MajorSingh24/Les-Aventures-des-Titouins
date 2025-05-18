@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Les Aventures des Titouins</title>
+  <style>
+    :root {
+      --gap: 1.5rem;
+      --card-bg: #fff;
+      --text-color: #333;
+      --border-radius: 12px;
+      --max-width: 1400px;
+      --bg-gradient: linear-gradient(135deg, #FFDEE9 0%, #B5FFFC 100%);
+    }
+    *, *::before, *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+    body {
+      font-family: 'Segoe UI', Tahoma, sans-serif;
+      background: var(--bg-gradient);
+      color: var(--text-color);
+      padding: var(--gap);
+      display: flex;
+      justify-content: center;
+    }
+    .container {
+      width: 100%;
+      max-width: var(--max-width);
+    }
+    h1 {
+      text-align: center;
+      margin-bottom: var(--gap);
+      font-size: 2.8rem;
+      letter-spacing: 1px;
+      color: #222;
+    }
+    .gallery {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: var(--gap);
+    }
+    @media (max-width: 900px) {
+      .gallery { grid-template-columns: repeat(2, 1fr); }
+    }
+    @media (max-width: 600px) {
+      .gallery { grid-template-columns: 1fr; }
+    }
+    .card {
+      position: relative;
+      background: var(--card-bg);
+      border-radius: var(--border-radius);
+      overflow: hidden;
+      box-shadow: 0 6px 16px rgba(0,0,0,0.1);
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+      cursor: pointer;
+      aspect-ratio: 4 / 3;
+    }
+    .card:hover {
+      transform: translateY(-6px);
+      box-shadow: 0 12px 24px rgba(0,0,0,0.15);
+    }
+    .card img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+    .overlay {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: rgba(0,0,0,0.6);
+      color: #fff;
+      padding: 0.75rem;
+      text-align: center;
+      font-size: 1rem;
+      opacity: 0;
+      transition: opacity 0.2s ease;
+    }
+    .card:hover .overlay {
+      opacity: 1;
+    }
+    /* Modal styles */
+    .modal {
+      display: none;
+      position: fixed;
+      z-index: 1000;
+      inset: 0;
+      background: rgba(0,0,0,0.8);
+      justify-content: center;
+      align-items: center;
+      padding: var(--gap);
+    }
+    .modal.open {
+      display: flex;
+    }
+    .modal img {
+      max-width: 100%;
+      max-height: 100%;
+      border-radius: var(--border-radius);
+      animation: zoomIn 0.3s ease-out;
+    }
+    .modal .close,
+    .modal .prev,
+    .modal .next {
+      position: absolute;
+      color: #fff;
+      font-size: 2.5rem;
+      cursor: pointer;
+      user-select: none;
+    }
+    .modal .close {
+      top: 1rem;
+      right: 1rem;
+    }
+    .modal .prev {
+      left: 1rem;
+      top: 50%;
+      transform: translateY(-50%);
+    }
+    .modal .next {
+      right: 1rem;
+      top: 50%;
+      transform: translateY(-50%);
+    }
+    @keyframes zoomIn {
+      from { transform: scale(0.7); }
+      to   { transform: scale(1);   }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Les Aventures des Titouins</h1>
+    <div class="gallery" id="gallery"></div>
+  </div>
+  <div id="modal" class="modal">
+    <span class="close" id="modal-close">&times;</span>
+    <span class="prev" id="modal-prev">&#10094;</span>
+    <img id="modal-img" src="" alt="Affichage agrandi">
+    <span class="next" id="modal-next">&#10095;</span>
+  </div>
+  <script>
+    const posters = [
+      { src: 'https://media.discordapp.net/attachments/1373602804895318056/1373603126292250654/image.jpg?ex=682b0319&is=6829b199&hm=2103a902fc8b779fcae9cbccbc3c8dfc97638dbc8bd7c1fdcf05e6f21aada9a1&=&format=webp&width=1656&height=1240', title: 'Planning du 16 déc. 2024' },
+      { src: 'https://media.discordapp.net/attachments/1373602804895318056/1373603126610890772/image.jpg?ex=682b0319&is=6829b199&hm=6c3deeaeb07e71db0d2b3b39a1435e4ce8f2e6bf4958d69494b183bf470cfdd9&=&format=webp&width=1654&height=1240', title: 'Mufasa: Le Roi Lion VF 3D' },
+      { src: 'https://media.discordapp.net/attachments/1373602804895318056/1373603127021928448/image.jpg?ex=682b0319&is=6829b199&hm=2dc491fb9d5be5b7e4b6d968281ece928bb3557396425a8ca79c8b05cd31b580&=&format=webp&width=1654&height=1240', title: 'Chloétan: Lumière & Mouvement' },
+      { src: 'https://media.discordapp.net/attachments/1373602804895318056/1373602855096684584/Planning_Lundi_13_Janvier_2025_.png?ex=682b02d8&is=6829b158&hm=fa0eb6b445a0d9d86fa8036d79b4ef74ba016e509f79dd68e4dc4feb3c31e5ad&=&format=webp&quality=lossless&width=1654&height=1240', title: 'Planning 13 janv. 2025' },
+      { src: 'https://media.discordapp.net/attachments/1373602804895318056/1373603127332438066/image.jpg?ex=682b0319&is=6829b199&hm=d0423a88f12580942a19748e7d439cca24b19342972e969cb804e589646cd3ec&=&format=webp&width=900&height=900', title: 'Les Titouins invalides' },
+      { src: 'https://media.discordapp.net/attachments/1373602804895318056/1373603127701274684/image.jpg?ex=682b0319&is=6829b199&hm=7871e17d5df166498e42479c8c0d29034e255ca95c1a063781d8a059fcd65949&=&format=webp&width=900&height=900', title: 'Les Titouins à Versailles' },
+      { src: 'https://media.discordapp.net/attachments/1373602804895318056/1373602855621099570/Les_titouin_a_Disney_.png?ex=682b02d9&is=6829b159&hm=1382870ceb6af17d94b72a6439debb85bb39089b4c8821cc025c993fb135e864&=&format=webp&quality=lossless&width=877&height=1240', title: 'Les Titouins à Disney' },
+      { src: 'https://media.discordapp.net/attachments/1373602804895318056/1373602855969099826/Les_demi_titouins_a_la_tele.png?ex=682b02d9&is=6829b159&hm=6520b14e84ecca46e915107ffff51cadd0a5809f6564ec20112fd7fcba58a2be&=&format=webp&quality=lossless&width=900&height=900', title: 'Les demi Titouins à la télé' },
+      { src: 'https://media.discordapp.net/attachments/1373602804895318056/1373602856241725471/Copie_de_les_titouin_au_zoo.png?ex=682b02d9&is=6829b159&hm=d6b5dc9249de197646ca19a6d711d8d2829faaf21dc6db17af6adb126ad09030&=&format=webp&quality=lossless&width=900&height=900', title: 'Les Titouins au zoo' }
+    ];
+    const gallery = document.getElementById('gallery');
+    const modal = document.getElementById('modal');
+    const modalImg = document.getElementById('modal-img');
+    const modalClose = document.getElementById('modal-close');
+    const modalPrev = document.getElementById('modal-prev');
+    const modalNext = document.getElementById('modal-next');
+    let currentIndex = 0;
+    function openModal() {
+      const { src, title } = posters[currentIndex];
+      modalImg.src = src;
+      modalImg.alt = title;
+      modal.classList.add('open');
+    }
+    posters.forEach((poster, idx) => {
+      const card = document.createElement('div');
+      card.className = 'card';
+      const img = document.createElement('img');
+      img.src = poster.src;
+      img.alt = poster.title;
+      img.addEventListener('click', () => { currentIndex = idx; openModal(); });
+      const overlay = document.createElement('div');
+      overlay.className = 'overlay';
+      overlay.textContent = poster.title;
+      card.append(img, overlay);
+      gallery.appendChild(card);
+    });
+    modalClose.addEventListener('click', () => modal.classList.remove('open'));
+    modal.addEventListener('click', e => { if (e.target === modal) modal.classList.remove('open'); });
+    modalPrev.addEventListener('click', e => { e.stopPropagation(); currentIndex = (currentIndex - 1 + posters.length) % posters.length; openModal(); });
+    modalNext.addEventListener('click', e => { e.stopPropagation(); currentIndex = (currentIndex + 1) % posters.length; openModal(); });
+  </script>
+</body>
+</html>
